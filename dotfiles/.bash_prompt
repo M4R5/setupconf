@@ -1,0 +1,71 @@
+#!/bin/bash
+
+function parse_git_branch {
+    local YELLOW="\[\033[0;33m\]"
+    local COLOR_NONE="\[\e[0m\]"
+
+    git_status="$(git status 2> /dev/null)"
+    branch_pattern="^On branch ([^${IFS}]*)"
+    detach_pattern="^HEAD detached (at|from) ([^${IFS}]*)"
+    remote_pattern="Your branch is (.*) '"
+    diverge_pattern="Your branch and (.*) have diverged"
+
+    if [[ ! ${git_status} =~ "working directory clean" ]]; then
+        state="${YELLOW}⚡${COLOR_NONE}"
+    fi
+
+    # add an else if or two here if you want to get more specific
+    if [[ ${git_status} =~ ${remote_pattern} ]]; then
+        if [[ ${BASH_REMATCH[1]} == "ahead of" ]]; then
+            remote="${YELLOW}↑${COLOR_NONE}"
+        else
+            remote="${YELLOW}↓${COLOR_NONE}"
+        fi
+    fi
+    if [[ ${git_status} =~ ${diverge_pattern} ]]; then
+        remote="${YELLOW}↕${COLOR_NONE}"
+    fi
+
+    if [[ ${git_status} =~ ${branch_pattern} ]]; then
+        branch=${BASH_REMATCH[1]}
+        echo "(${branch})${remote}${state}"
+    fi
+
+    if [[ ${git_status} =~ ${detach_pattern} ]]; then
+        branch=${BASH_REMATCH[2]}
+        echo "(${branch})${remote}${state}"
+    fi
+}
+
+function prompt_func() {
+    local previous_return_value=$?;
+
+    local RED="\[\033[0;31m\]"
+    #local GREEN="\[\033[0;32m\]"
+    local YELLOW="\[\033[0;33m\]"
+    local BLUE="\[\033[0;34m\]"
+    local CYAN="\[\033[0;36m\]"
+    local COLOR_NONE="\[\e[0m\]"
+
+    local prompt=""
+
+    if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+        debian_chroot=$(cat /etc/debian_chroot)
+        prompt+="(${debian_chroot}) "
+    fi
+
+    prompt+="${YELLOW}\A ${BLUE}\u@\h ${CYAN}\w ${COLOR_NONE}"
+
+    git rev-parse --git-dir > /dev/null 2>&1
+    if [[ $? == 0 ]]; then
+        prompt+="${RED}$(parse_git_branch)${COLOR_NONE} "
+    fi
+
+    if [[ $previous_return_value != 0 ]]; then
+        prompt+="${RED}${previous_return_value}${COLOR_NONE} "
+    fi
+
+    PS1="${prompt}"
+}
+
+PROMPT_COMMAND=prompt_func

@@ -1,0 +1,7 @@
+[user]
+	name = Marc FRESNE
+	email = marc.fresne@epita.fr
+[core]
+	editor = vim
+[push]
+	default = matching
