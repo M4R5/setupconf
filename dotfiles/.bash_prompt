@@ -56,9 +56,13 @@ function prompt_func() {
 
     prompt+="${YELLOW}\A ${BLUE}\u@\h ${CYAN}\w ${COLOR_NONE}"
 
-    git rev-parse --git-dir > /dev/null 2>&1
+    git_dir="$(git rev-parse --git-dir 2>&1)"
     if [[ $? == 0 ]]; then
-        prompt+="${RED}$(parse_git_branch)${COLOR_NONE} "
+        if [[ $(du -s "${git_dir}" | cut -f1) -lt 1024 ]]; then
+            prompt+="${RED}$(parse_git_branch)${COLOR_NONE} "
+        else
+            prompt+="${RED}(git_too_long)${COLOR_NONE} "
+        fi
     fi
 
     if [[ $previous_return_value != 0 ]]; then
