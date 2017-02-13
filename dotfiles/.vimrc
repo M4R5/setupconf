@@ -20,6 +20,9 @@ Plugin 'bling/vim-airline'
 " Valloric : YouCompleteMe - Autocompletion
 Plugin 'Valloric/YouCompleteMe'
 
+" vivien : linux-conding-style - setup for linux dev
+Plugin 'vivien/vim-linux-coding-style'
+
 call vundle#end()
 filetype plugin indent on
 
@@ -100,7 +103,7 @@ set laststatus=2
 " Change invisible character when :set list
 set listchars=eol:¬
 " Do listchars replacement
-set list
+"set list
 
 " Try to create undofiles in ${HOME}/.vim/.undo
 try
